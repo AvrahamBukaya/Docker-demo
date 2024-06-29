@@ -1,0 +1,91 @@
+version: '3.1'
+
+services:
+  db:
+   image: mysql:latest
+   volumes:
+    - mysql_data:/var/lib/mysql
+   container_name: mysql
+   restart: always
+   networks:
+      - wp_network 
+   environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: web_content  
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Ba@1991
+      #MYSQL_ALLOW_EMPTY_PASSWORD: yes
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    restart: always
+    volumes:
+      - wp_data:/var/www/html
+    ports:
+      - "8080:80"
+    environment:
+       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_USER: admin
+       WORDPRESS_DB_PASSWORD: Ba@1991
+       WORDPRESS_DB_NAME: web_content
+      
+    networks:
+      - wp_network
+  
+   
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - wp_network
+    environment:
+     - TZ=Asia/Jerusalem
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+     - ./nginx.conf:/etc/nginx/nginx.conf
+      - wp_data:/var/www/html
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - wp_network
+    depends_on:
+      - wordpress
+    environment:
+      - TZ=Asia/Jerusalem
+  php:
+    image: php:latest
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - redis
+    networks:
+      - wp_network
+
+volumes:
+  mysql_data:
+  redis_data:
+  wp_data:
+networks:
+  wp_network:
+
+
+
+
+
+
+  
+
+                   
+
+
+
+        
+    
+    
